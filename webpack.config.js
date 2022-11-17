@@ -1,6 +1,15 @@
 const path = require("path");
 const outputPath = path.resolve(__dirname, "public");
-const HtmlWebpackPlugin = require('html-webpack-plugin'); //ここを追加
+var fs = require('fs');
+
+// var nodeModules = {};
+// fs.readdirSync('node_modules')
+//   .filter(function(x) {
+//     return ['.bin'].indexOf(x) === -1;
+//   })
+//   .forEach(function(mod) {
+//     nodeModules[mod] = 'commonjs ' + mod;
+//   });
 
 module.exports = {
     // モード値を production に設定すると最適化された状態で、
@@ -34,7 +43,11 @@ module.exports = {
         extensions: [
             '.ts', '.js',
         ],
+        fallback:{"path":false,"fs":false},
     },
+
+   // externals: nodeModules,
+
     // settings for developer server
     devServer: {
         static: `${outputPath}`,
@@ -42,9 +55,5 @@ module.exports = {
         open: true,
         hot: true
     },
-    plugins: [
-        new HtmlWebpackPlugin({
-            template: "src/index.html"
-        })
-    ]
+
 };

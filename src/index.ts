@@ -1,4 +1,4 @@
-import {GameMaster} from './GameMaster'
+import * as DOM from './DOM';
 
-const master =new GameMaster();
-master.start();
+const text = DOM.make('h1',"hello world!");
+DOM.id('main').append(text);

@@ -1,3 +1,3 @@
-# typescript-scene-transition-example
+# nodejsをinstallした上で
 npm install  
 npm run start  

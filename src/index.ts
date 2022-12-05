@@ -39,6 +39,8 @@ class App {
         const poses = await detector.detect(camera.video);
         if (poses.length > 0 ) {
             camera.drawResults(poses);
+
+            //例えばここでposesを分析するクラスのメソッドを呼び出す
         }
 
         //本メソッドをループ実行する(抜けたあと，再度呼び出される)

@@ -1,9 +1,16 @@
 <html><head><script defer src="bundle.js"></script></head>
     <body>
-        <body>
-            <div id="main">
-                main
-            </div>
-        </body>
+        <div id="main">
+            main
+            <canvas id="output"></canvas>
+            <video id="video" playsinline style="
+              -webkit-transform: scaleX(-1);
+              transform: scaleX(-1);
+              visibility: hidden;
+              width: auto;
+              height: auto;
+              ">
+            </video>
+        </div>
     </body>
 </html>

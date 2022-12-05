@@ -16,5 +16,5 @@ import {SupportedModels} from '@tensorflow-models/pose-detection';
    enableTracking: false
  };
 
- export const model = SupportedModels.MoveNet;
+ export const detection_model = SupportedModels.MoveNet;
  export const modelConfig = MOVENET_CONFIG;

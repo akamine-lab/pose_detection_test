@@ -1,4 +1,5 @@
- 
+import {SupportedModels} from '@tensorflow-models/pose-detection';
+
  export const DEFAULT_LINE_WIDTH = 2;
  export const DEFAULT_RADIUS = 4;
  
@@ -15,4 +16,5 @@
    enableTracking: false
  };
 
+ export const model = SupportedModels.MoveNet;
  export const modelConfig = MOVENET_CONFIG;

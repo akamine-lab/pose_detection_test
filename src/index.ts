@@ -4,24 +4,20 @@
 import '@tensorflow/tfjs-backend-webgl';
 import * as tf from '@tensorflow/tfjs-core';
 import * as posedetection from '@tensorflow-models/pose-detection';
-import { MoveNetModelConfig } from '@tensorflow-models/pose-detection';
-import { Camera, MODELS } from './camera';
+import { Pose, Keypoint, MoveNetModelConfig } from '@tensorflow-models/pose-detection';
+import { Camera } from './camera';
 import * as params from './params';
 
-
 class App {
-    model:posedetection.SupportedModels;
     camera?: Camera;
     detector?: posedetection.PoseDetector;
 
     constructor() {
-        this.model = posedetection.SupportedModels.MoveNet;
     }
 
     async build() {
         //cameraParam: { targetFPS: number, sizeOption: { width: number, height: number } }) {
         this.camera = await Camera.setupCamera(
-            this.model,
             { targetFPS: 30, sizeOption: { width: 640, height: 480 } }
             );
 
@@ -36,6 +32,7 @@ class App {
     }
 
     async createDetector() : Promise<posedetection.PoseDetector> {
+        const modelName = params.detection_model;
         let modelTypeName = 'thunder';
         let customModel = '';
 
@@ -56,23 +53,15 @@ class App {
         if (modelTypeName === 'multipose') {
           modelConfig.enableTracking = params.modelConfig.enableTracking;
         }
-        return posedetection.createDetector(this.model, modelConfig);
+        return posedetection.createDetector(modelName, modelConfig);
     }
 
-    async renderResult() {
+    async detect() : Promise<Pose[]>  {
         //this.cameraとthis.detectorは確実にnullではない（ようにプログラマはコーディングしている）
         const camera = this.camera!;
         const detector = this.detector!;
 
-        if (camera.video.readyState < 2) {
-            await new Promise((resolve) => {
-                camera.video.onloadeddata = () => {
-                    resolve(camera.video);
-                };
-            });
-        }
-
-        let poses = undefined;
+        let poses = Array<Pose>();
 
         // Detectors can throw errors, for example when using custom URLs that
         // contain a model that doesn't provide the expected output.
@@ -86,19 +75,20 @@ class App {
             alert(error);
         }
 
-
-        if (poses && poses.length > 0 ) {
-            camera.drawResults(poses);
-        }
-    }
-
-    async renderPrediction() {
-        this.camera!.drawCtx();
-        await this.renderResult();
+        return poses;
     }
 
     async run() {
-        this.renderPrediction();
+        //this.cameraとthis.detectorは確実にnullではない（ようにプログラマはコーディングしている）
+        const camera = this.camera!;
+
+        await camera.waitReady();
+        camera.drawVideo();
+
+        const poses = await this.detect();
+        if (poses.length > 0 ) {
+            camera.drawResults(poses);
+        }
 
         //本メソッドをループ実行する(抜けたあと，再度呼び出される)
         requestAnimationFrame(this.run.bind(this));

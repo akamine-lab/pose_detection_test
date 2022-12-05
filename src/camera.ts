@@ -2,31 +2,19 @@ import * as posedetection from '@tensorflow-models/pose-detection';
 import { Pose, Keypoint } from '@tensorflow-models/pose-detection';
 import * as params from './params';
 
-// async function test() {
-//    const model = posedetection.SupportedModels.MoveNet;
-//     const modelType = posedetection.movenet.modelType.SINGLEPOSE_LIGHTNING;
-//     const modelConfig = {modelType};
-//     const detector = await posedetection.createDetector(model, modelConfig);
-//     detector.estimatePoses
-// }
-// test();
-
 const COLOR_PALETTE = [
     '#ffffff', '#800000', '#469990', '#e6194b', '#42d4f4', '#fabed4', '#aaffc3',
     '#9a6324', '#000075', '#f58231', '#4363d8', '#ffd8b1', '#dcbeff', '#808000',
     '#ffe119', '#911eb4', '#bfef45', '#f032e6', '#3cb44b', '#a9a9a9'
 ];
 
-export const MODELS = posedetection.SupportedModels;
-
 export class Camera {
     video: HTMLVideoElement;
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
-    model: posedetection.SupportedModels;
+    model: posedetection.SupportedModels = params.detection_model;
 
-    constructor(model: posedetection.SupportedModels) {
-        this.model = model;
+    constructor() {
         this.video = document.getElementById('video') as HTMLVideoElement;
         this.canvas = document.getElementById('output') as HTMLCanvasElement;
         this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
@@ -36,7 +24,6 @@ export class Camera {
      * Initiate a Camera instance and wait for the camera stream to be ready.
      */
     static async setupCamera(
-        model: posedetection.SupportedModels,
         cameraParam: { targetFPS: number, sizeOption: { width: number, height: number } }) {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             throw new Error(
@@ -58,7 +45,7 @@ export class Camera {
 
         const stream = await navigator.mediaDevices.getUserMedia(videoConfig);
 
-        const camera = new Camera(model);
+        const camera = new Camera();
         camera.video.srcObject = stream;
 
         await new Promise((resolve) => {
@@ -84,8 +71,21 @@ export class Camera {
 
         return camera;
     }
+    
+    /* ビデオフレームが利用可能になるまで待機
+    */
+    async waitReady() {
+        //https://developer.mozilla.org/ja/docs/Web/API/HTMLMediaElement/readyState
+        if (this.video.readyState < 2) {
+            await new Promise((resolve) => {
+                this.video.onloadeddata = () => {
+                    resolve(this.video);
+                };
+            });
+        }
+    }
 
-    drawCtx() {
+    drawVideo() {
         //console.log(this, this.ctx);
         this.ctx.drawImage(
             this.video, 0, 0, this.video.videoWidth, this.video.videoHeight);

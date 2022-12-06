@@ -6,12 +6,15 @@ import * as tf from '@tensorflow/tfjs-core';
 import * as posedetection from '@tensorflow-models/pose-detection';
 import { Pose, Keypoint, MoveNetModelConfig } from '@tensorflow-models/pose-detection';
 import { Camera } from './camera';
-import { Detector } from './detector';
+import { PoseDetector } from './PoseDetector';
+import { HandDetector } from './HandDetector';
 import * as params from './params';
+import { threadId } from 'worker_threads';
 
 class App {
     camera?: Camera;
-    detector?: Detector;
+    poseDetector?: PoseDetector;
+    handDetector?: HandDetector;
 
     constructor() {
     }
@@ -24,19 +27,24 @@ class App {
                 sizeOption: { width: 640, height: 480 } }
             );
 
-        this.detector = await Detector.create();
-
+        this.poseDetector = await PoseDetector.create();
+        this.handDetector = await HandDetector.create();
     }
 
     async run() {
         //this.cameraとthis.detectorは確実にnullではない（ようにプログラマはコーディングしている）
         const camera = this.camera!;
-        const detector = this.detector!;
+        const detector = this.poseDetector!;
+        const hand = this.handDetector!;
 
         await camera.waitReady();
         camera.drawVideo();
 
+        const hands = await hand.detect(camera.video);
         const poses = await detector.detect(camera.video);
+        if(hands.length > 0) {
+            camera.drawHands(hands);
+        }
         if (poses.length > 0 ) {
             camera.drawResults(poses);
 

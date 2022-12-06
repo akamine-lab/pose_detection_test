@@ -1,5 +1,6 @@
 import * as posedetection from '@tensorflow-models/pose-detection';
 import { Pose, Keypoint } from '@tensorflow-models/pose-detection';
+import { Hand } from '@tensorflow-models/hand-pose-detection';
 import * as params from './params';
 
 const COLOR_PALETTE = [
@@ -89,6 +90,7 @@ export class Camera {
         //console.log(this, this.ctx);
         this.ctx.drawImage(
             this.video, 0, 0, this.video.videoWidth, this.video.videoHeight);
+
     }
 
     clearCtx() {
@@ -99,7 +101,15 @@ export class Camera {
      * Draw the keypoints and skeleton on the video.
      * @param poses A list of poses to render.
      */
-    drawResults(poses: Pose[]) {
+    drawResults(poses_or_hands: Pose[] | Hand[]) {
+        if(poses_or_hands instanceof Array<Pose>) {
+            this.drawPoses(poses_or_hands);
+        }else {
+            this.drawHands(poses_or_hands);
+        }
+    }
+
+    drawPoses(poses : Pose[]) {
         for (const pose of poses) {
             this.drawResult(pose);
         }
@@ -153,6 +163,9 @@ export class Camera {
             circle.arc(keypoint.x, keypoint.y, params.DEFAULT_RADIUS, 0, 2 * Math.PI);
             this.ctx.fill(circle);
             this.ctx.stroke(circle);
+
+            //console.log(keypoint);
+
         }
     }
 
@@ -187,5 +200,24 @@ export class Camera {
                 this.ctx.stroke();
             }
         });
+    }
+
+    drawHands(hands:Hand[], thre = 0.2) {
+        // this.ctx.fillStyle = 'rgba(255,0,0,0.8)';
+        // this.ctx.strokeStyle = 'White'; 
+        // this.ctx.lineWidth = params.DEFAULT_LINE_WIDTH;
+
+
+        for(const hand of hands) {
+            if(hand.score > thre) {
+                const kps = hand.keypoints;
+                for(const kp of kps) {
+                    this.ctx.beginPath();
+                    this.ctx.arc(kp.x, kp.y, params.DEFAULT_RADIUS, 0, 2 * Math.PI);
+                    this.ctx.fill();
+                    this.ctx.stroke();
+                }
+            }
+        }
     }
 }

@@ -7,14 +7,14 @@ import * as posedetection from '@tensorflow-models/pose-detection';
 import { Pose, MoveNetModelConfig } from '@tensorflow-models/pose-detection';
 import * as params from './params';
 
-export class Detector {
+export class PoseDetector {
     tfDetector?: posedetection.PoseDetector;
 
     constructor() {
     }
 
-    static async create() : Promise<Detector> {
-        const detector = new Detector();
+    static async create() : Promise<PoseDetector> {
+        const detector = new PoseDetector();
         await detector.setup();
 
         return detector;
@@ -22,7 +22,7 @@ export class Detector {
 
     async setup() {
         try {
-            this.tfDetector = await Detector.createDetector();
+            this.tfDetector = await PoseDetector.createDetector();
             console.log("tf backend:",tf.getBackend());
         }catch(err) {
             console.warn(err);

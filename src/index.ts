@@ -1,4 +1,4 @@
-//以下のpose-detection/demos/live_video/からの抜粋コードが含まれます
+ //以下のpose-detection/demos/live_video/からの抜粋コードが含まれます
 //https://github.com/tensorflow/tfjs-models
 
 import '@tensorflow/tfjs-backend-webgl';
@@ -6,15 +6,12 @@ import * as tf from '@tensorflow/tfjs-core';
 import * as posedetection from '@tensorflow-models/pose-detection';
 import { Pose, Keypoint, MoveNetModelConfig } from '@tensorflow-models/pose-detection';
 import { Camera } from './camera';
-import { PoseDetector } from './PoseDetector';
-import { HandDetector } from './HandDetector';
+import { Detector } from './detector';
 import * as params from './params';
-import { threadId } from 'worker_threads';
 
 class App {
     camera?: Camera;
-    poseDetector?: PoseDetector;
-    handDetector?: HandDetector;
+    detector?: Detector;
 
     constructor() {
     }
@@ -27,24 +24,19 @@ class App {
                 sizeOption: { width: 640, height: 480 } }
             );
 
-        this.poseDetector = await PoseDetector.create();
-        this.handDetector = await HandDetector.create();
+        this.detector = await Detector.create();
+
     }
 
     async run() {
         //this.cameraとthis.detectorは確実にnullではない（ようにプログラマはコーディングしている）
         const camera = this.camera!;
-        const detector = this.poseDetector!;
-        const hand = this.handDetector!;
+        const detector = this.detector!;
 
         await camera.waitReady();
         camera.drawVideo();
 
-        const hands = await hand.detect(camera.video);
         const poses = await detector.detect(camera.video);
-        if(hands.length > 0) {
-            camera.drawHands(hands);
-        }
         if (poses.length > 0 ) {
             camera.drawResults(poses);
 
